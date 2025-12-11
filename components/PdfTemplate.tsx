@@ -57,12 +57,12 @@ const LineField = ({
          <div className={`${width} border-b border-black relative ${multiline ? 'h-auto min-h-[1.5rem]' : 'h-6'}`}>
             {multiline ? (
                 // Multiline: Flow content naturally with wrapping, adjusted padding to float above border
-                <div className={`w-full text-blue-900 font-bold ${fontSize} uppercase leading-tight whitespace-pre-wrap break-words pl-2 pb-[2px]`} style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
+                <div className={`w-full text-blue-900 font-bold ${fontSize} uppercase leading-tight whitespace-pre-wrap break-words pl-2 pb-[6px]`} style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
                    {value}
                 </div>
             ) : (
                 // Single line: Absolute positioning to float strictly above the line
-                <span className="absolute bottom-[6px] left-2 text-blue-900 font-bold text-sm uppercase leading-none whitespace-nowrap overflow-visible z-10" style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
+                <span className="absolute bottom-[8px] left-2 text-blue-900 font-bold text-sm uppercase leading-none whitespace-nowrap overflow-visible z-10" style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
                   {value}
                 </span>
             )}
