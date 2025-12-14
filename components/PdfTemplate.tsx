@@ -20,13 +20,20 @@ const formatDate = (dateStr: string) => {
 const CheckBox = ({ checked, label, className = "" }: { checked: boolean; label?: string; className?: string }) => (
   <div className={`flex items-center gap-2 ${className}`}>
     <div className="w-5 h-5 border border-black flex items-center justify-center bg-white shrink-0 relative">
-      {checked && <Check size={20} strokeWidth={4} className="text-black absolute" />}
+      {checked && <Check size={16} strokeWidth={4} className="text-black" />}
     </div>
     {label && <span className="text-sm font-bold pt-0.5">{label}</span>}
   </div>
 );
 
-// Improved LineField: Supports multiline and dynamic sizing to prevent text overflow
+// Checkbox without label, for custom layouts
+const CheckBoxOnly = ({ checked }: { checked: boolean }) => (
+    <div className="w-5 h-5 border border-black flex items-center justify-center bg-white shrink-0 relative">
+      {checked && <Check size={16} strokeWidth={4} className="text-black" />}
+    </div>
+);
+
+// Improved LineField: Supports multiline stacking within the template layout
 const LineField = ({ 
   label, 
   value = "", 
@@ -42,31 +49,31 @@ const LineField = ({
   labelClass?: string;
   multiline?: boolean;
 }) => {
-    // Dynamic font size: shrink text if it's long and multiline to fit better
+    // Dynamic font size logic to keep text inside the box
     let fontSize = "text-sm";
-    if (multiline) {
-        if (value.length > 200) fontSize = "text-[8px]";
-        else if (value.length > 120) fontSize = "text-[9px]";
-        else if (value.length > 80) fontSize = "text-[10px]";
-        else if (value.length > 50) fontSize = "text-xs";
+    
+    if (multiline && value) {
+        const len = value.length;
+        // More aggressive scaling to prevent overflow
+        if (len > 250) fontSize = "text-[7px]";
+        else if (len > 180) fontSize = "text-[8px]";
+        else if (len > 130) fontSize = "text-[9px]";
+        else if (len > 90) fontSize = "text-[10px]";
+        else if (len > 50) fontSize = "text-xs";
     }
 
     return (
       <div className={`flex items-end gap-1 ${className}`}>
          {label && <span className={`${labelClass} whitespace-nowrap mb-1 shrink-0`}>{label} :</span>}
-         <div className={`${width} border-b border-black relative ${multiline ? 'h-auto min-h-[1.5rem]' : 'h-6'}`}>
-            {multiline ? (
-                // Multiline: Flow content naturally with wrapping, adjusted padding to float above border
-                <div className={`w-full text-blue-900 font-bold ${fontSize} uppercase leading-tight whitespace-pre-wrap break-words pl-2 pb-[8px]`} style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
-                   {value}
-                </div>
-            ) : (
-                // Single line: Absolute positioning to float strictly above the line
-                // Changed from bottom-[8px] to bottom-[10px] to make it float higher
-                <span className="absolute bottom-[10px] left-2 text-blue-900 font-bold text-sm uppercase leading-none whitespace-nowrap overflow-visible z-10" style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
-                  {value}
-                </span>
-            )}
+         <div className={`${width} border-b border-black relative min-h-[1.5rem]`}>
+            {/* 
+              Standard flow div to allow text to wrap ("stack") naturally.
+              We use leading-none and small padding to keep it tight and prevent layout breakage.
+            */}
+            <div className={`w-full text-blue-900 font-bold ${fontSize} uppercase leading-none whitespace-pre-wrap break-words pl-2 pb-0.5`} 
+                 style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
+                {value}
+            </div>
          </div>
       </div>
     );
@@ -132,6 +139,8 @@ export const PdfTemplate = forwardRef<HTMLDivElement, PdfTemplateProps>(({ data 
                   </div>
                </div>
                
+               {/* Email Field Removed from PDF Template as requested */}
+
                <div className="flex items-center gap-2 pt-1">
                   <span className="font-bold w-16 shrink-0">Category :</span>
                   <div className="flex items-center gap-6">
@@ -202,18 +211,18 @@ export const PdfTemplate = forwardRef<HTMLDivElement, PdfTemplateProps>(({ data 
                 
                 <div className="h-px bg-black my-1"></div>
 
-                {/* Specs Grid - Modified to stack long fields */}
+                {/* Specs Grid */}
                 <div className="flex flex-col gap-3 mt-1">
                     {/* Row 1: Colour Scheme (Full width) */}
                     <LineField label="Colour Scheme" value={data.colourScheme} multiline className="w-full" />
                     
-                    {/* Row 2: Material and Dimension (Half width each) */}
+                    {/* Row 2: Material and Dimension (Side-by-side) */}
                     <div className="flex gap-4">
                          <div className="w-1/2">
-                            <LineField label="Type of Material" value={data.typeOfMaterial} />
+                            <LineField label="Type of Material" value={data.typeOfMaterial} multiline />
                          </div>
                          <div className="w-1/2">
-                            <LineField label="Dimension" value={data.dimension} />
+                            <LineField label="Dimension" value={data.dimension} multiline />
                          </div>
                     </div>
 
@@ -235,24 +244,42 @@ export const PdfTemplate = forwardRef<HTMLDivElement, PdfTemplateProps>(({ data 
                    <div className="w-28 shrink-0 font-bold leading-none pt-1">Information Required on Artwork</div>
                    <span className="pt-1 shrink-0">:</span>
                    <div className="flex-1 space-y-2">
+                      {/* Barcode Row */}
                       <div className="flex items-center gap-2">
-                         <CheckBox checked={data.infoRequired.barcode} label="Barcode (Provide by Halagel / Customer)" />
+                         <CheckBoxOnly checked={data.infoRequired.barcode} />
+                         <span className="font-bold text-sm">
+                            Barcode (Provide by{' '}
+                            <span className={data.infoRequired.barcodeProvider === 'Halagel' ? 'underline decoration-2 underline-offset-2' : ''}>Halagel</span>
+                            {' / '}
+                            <span className={data.infoRequired.barcodeProvider === 'Customer' ? 'underline decoration-2 underline-offset-2' : ''}>Customer</span>
+                            )
+                         </span>
                          <span className="mx-1">:</span>
-                         <div className="border-b border-dotted border-black w-40 h-5 relative">
-                             <span className="absolute bottom-[10px] left-0 w-full text-center text-xs text-blue-900 font-bold" style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
-                                {data.infoRequired.barcode ? data.infoRequired.barcodeProvider : ''}
+                         <div className="border-b border-dotted border-black w-48 h-5 relative flex items-center justify-center">
+                             <span className="absolute bottom-[10px] text-blue-900 font-bold text-xs uppercase" style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
+                                {data.infoRequired.barcode ? data.infoRequired.barcodeProviderName : ''}
                              </span>
                          </div>
                       </div>
+
+                      {/* QR Code Row */}
                       <div className="flex items-center gap-2">
-                         <CheckBox checked={data.infoRequired.qrCode} label="QR Code (Provide by Halagel / Customer)" />
+                         <CheckBoxOnly checked={data.infoRequired.qrCode} />
+                         <span className="font-bold text-sm">
+                            QR Code (Provide by{' '}
+                            <span className={data.infoRequired.qrCodeProvider === 'Halagel' ? 'underline decoration-2 underline-offset-2' : ''}>Halagel</span>
+                            {' / '}
+                            <span className={data.infoRequired.qrCodeProvider === 'Customer' ? 'underline decoration-2 underline-offset-2' : ''}>Customer</span>
+                            )
+                         </span>
                          <span className="mx-1">:</span>
-                         <div className="border-b border-dotted border-black w-40 h-5 relative">
-                             <span className="absolute bottom-[10px] left-0 w-full text-center text-xs text-blue-900 font-bold" style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
-                                {data.infoRequired.qrCode ? data.infoRequired.qrCodeProvider : ''}
+                         <div className="border-b border-dotted border-black w-48 h-5 relative flex items-center justify-center">
+                             <span className="absolute bottom-[10px] text-blue-900 font-bold text-xs uppercase" style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>
+                                {data.infoRequired.qrCode ? data.infoRequired.qrCodeProviderName : ''}
                              </span>
                          </div>
                       </div>
+
                       <div className="flex items-center gap-2 w-full">
                          <CheckBox checked={data.infoRequired.others} label="Others" />
                          <div className="flex-1">
