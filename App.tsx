@@ -116,7 +116,7 @@ export default function App() {
                    alt="Halagel Logo" className="w-full h-full object-contain filter brightness-0 invert" />
                 </div>
                 <div>
-                  <h1 className="text-m font-bold text-white leading-tight">ARTWORK & DESIGN REQUEST</h1>
+                  <h1 className="text-m font-bold text-white leading-tight">ARTWORK & DESIGN REQUEST FORM</h1>
                   <p className="text-xs text-emerald-100 font-medium opacity-90">Halagel Group of Companies</p>
                 </div>
              </div>
@@ -129,7 +129,7 @@ export default function App() {
         <div className="px-8 py-6 space-y-8 pb-32">
            {/* Section A */}
            <div className="bg-white rounded-xl">
-             <SectionTitle title="A) Requestor Details" color="text-yellow-700" borderColor="border-emerald-200" />
+             <SectionTitle title="A) Requestor Details" color="text-emerald-700" borderColor="border-emerald-200" />
 
              <div className="space-y-4">
                <div className="grid grid-cols-2 gap-4">
@@ -178,7 +178,7 @@ export default function App() {
 
            {/* Section B */}
            <div>
-             <SectionTitle title="B) Details Requisition" color="text-orange-700" borderColor="border-teal-200" />
+             <SectionTitle title="B) Details Requisition" color="text-emerald-700" borderColor="border-teal-200" />
              <div className="space-y-5">
                 <FormInput 
                     label="Product Name" 
@@ -322,7 +322,7 @@ export default function App() {
 
                   <CheckboxGroup label="Intended For">
                     <div className="grid grid-cols-2 gap-2">
-                      {['softgel', 'toothpaste', 'cosmetics', 'fnb'].map(k => (
+                      {['softgel', 'toothpaste', 'cosmetics', 'f&b'].map(k => (
                         <label key={k} className="flex items-center gap-2 capitalize text-black hover:bg-gray-50 p-1 rounded cursor-pointer">
                           <input 
                             type="checkbox" 
@@ -394,7 +394,7 @@ export default function App() {
 
            {/* Section C */}
            <div>
-             <SectionTitle title="C) Declaration" color="text-rose-700" borderColor="border-rose-200" />
+             <SectionTitle title="C) Declaration" color="text-emerald-700" borderColor="border-rose-200" />
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <FormInput label="Requested By (Name)" value={data.requestedByName} onChange={(e) => handleInputChange('requestedByName', e.target.value)} />
                <FormInput label="Position" value={data.requestedByPosition} onChange={(e) => handleInputChange('requestedByPosition', e.target.value)} />
