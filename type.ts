@@ -38,9 +38,11 @@ export interface DesignRequestData {
   
   infoRequired: {
     barcode: boolean;
-    barcodeProvider: string;
+    barcodeProvider: string; // 'Halagel' | 'Customer'
+    barcodeProviderName: string; // New field for the name
     qrCode: boolean;
-    qrCodeProvider: string;
+    qrCodeProvider: string; // 'Halagel' | 'Customer'
+    qrCodeProviderName: string; // New field for the name
     others: boolean;
     othersSpecify: string;
     othersProvider: string;
@@ -83,8 +85,10 @@ export const INITIAL_DATA: DesignRequestData = {
   infoRequired: { 
     barcode: false, 
     barcodeProvider: '', 
+    barcodeProviderName: '',
     qrCode: false, 
     qrCodeProvider: '', 
+    qrCodeProviderName: '',
     others: false, 
     othersSpecify: '',
     othersProvider: ''
