@@ -79,18 +79,14 @@ export default function App() {
   };
 
   const generatePdf = async () => {
-    if (!data.productName) {
-        alert("Please enter a Product Name to generate the filename.");
-        return;
-    }
-    
     setIsGenerating(true);
     const blob = await generatePdfBlob();
     if (blob) {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Halagel_Artwork-&-Design_Request_${data.productName.replace(/[^a-z0-9]/gi, '_') || 'Draft'}.pdf`;
+        const filename = data.productName ? data.productName.replace(/[^a-z0-9]/gi, '_') : 'Draft';
+        link.download = `Halagel_Artwork-&-Design_Request_${filename}.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -151,7 +147,7 @@ export default function App() {
                       type="checkbox" 
                       className="accent-emerald-600 w-4 h-4"
                       checked={data.category === 'Halagel'} 
-                      onChange={() => handleInputChange('category', 'Halagel')} 
+                      onChange={() => handleInputChange('category', data.category === 'Halagel' ? '' : 'Halagel')} 
                     />
                     <span className="font-medium">Halagel</span>
                   </label>
@@ -160,7 +156,7 @@ export default function App() {
                       type="checkbox" 
                       className="accent-emerald-600 w-4 h-4"
                       checked={data.category === 'OEM'} 
-                      onChange={() => handleInputChange('category', 'OEM')} 
+                      onChange={() => handleInputChange('category', data.category === 'OEM' ? '' : 'OEM')} 
                     />
                     <span className="font-medium">OEM</span>
                   </label>
