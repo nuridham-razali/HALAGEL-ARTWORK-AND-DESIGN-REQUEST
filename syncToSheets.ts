@@ -1,36 +1,16 @@
-import { getAccessToken, googleSignIn } from './googleAuth';
 import { PurchaseLog } from './type';
 
-const SHEET_ID_KEY = 'halagel_google_sheet_id';
+const SCRIPT_URL_KEY = 'halagel_app_script_url';
 
 export const syncLogsToSheets = async (logs: PurchaseLog[]) => {
-  let token = await getAccessToken();
-  if (!token) {
-    const res = await googleSignIn();
-    if (!res) throw new Error('Sign in failed');
-    token = res.accessToken;
-  }
+  let scriptUrl = localStorage.getItem(SCRIPT_URL_KEY);
 
-  let sheetId = localStorage.getItem(SHEET_ID_KEY);
-
-  if (!sheetId) {
-    // Create new spreadsheet
-    const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        properties: {
-          title: 'Halagel Purchase Requests Database',
-        },
-      }),
-    });
-    if (!createRes.ok) throw new Error('Failed to create spreadsheet');
-    const createData = await createRes.json();
-    sheetId = createData.spreadsheetId;
-    localStorage.setItem(SHEET_ID_KEY, sheetId!);
+  if (!scriptUrl) {
+    scriptUrl = window.prompt("Please enter your Google Apps Script Web App URL:");
+    if (!scriptUrl) {
+      throw new Error('Sync cancelled. Apps Script URL is required.');
+    }
+    localStorage.setItem(SCRIPT_URL_KEY, scriptUrl);
   }
 
   // Define headers and format rows
@@ -57,30 +37,29 @@ export const syncLogsToSheets = async (logs: PurchaseLog[]) => {
     })
   ];
 
-  // We rewrite the entire sheet to keep it in sync (for simplicity)
-  // Clear existing
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1!A1:Z1000:clear`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  try {
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      // Send as text/plain to avoid CORS preflight, Apps Script can still parse it with JSON.parse
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({ values }),
+    });
 
-  // Update
-  const updateRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1!A1:J${values.length}?valueInputOption=USER_ENTERED`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      range: `Sheet1!A1:J${values.length}`,
-      majorDimension: 'ROWS',
-      values: values,
-    }),
-  });
-
-  if (!updateRes.ok) {
-    throw new Error('Failed to update spreadsheet');
+    const result = await res.json();
+    if (result.status === 'error') {
+      throw new Error(result.message);
+    }
+    
+    return result.sheetUrl; // Return the sheet URL from App Script
+  } catch (err: any) {
+    if (err.message === 'Failed to fetch') {
+      // Sometimes cors errors manifest as Failed to fetch, but we used text/plain so it shouldn't unless the url is bad
+      localStorage.removeItem(SCRIPT_URL_KEY); // clear bad url
+      throw new Error(`Failed to connect to the Apps Script URL. Please check the URL or your network connection. Try syncing again to re-enter. (${err.message})`);
+    }
+    throw err;
   }
-
-  return sheetId;
 };
+

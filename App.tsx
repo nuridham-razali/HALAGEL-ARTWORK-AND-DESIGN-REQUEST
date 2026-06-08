@@ -8,7 +8,6 @@ import { PurchasePdfTemplate } from './components/PurchasePdfTemplate';
 import { LOGO_BASE64 } from './constants';
 import { PurchaseLog } from './type';
 import { syncLogsToSheets } from './syncToSheets';
-import { initAuth } from './googleAuth';
 
 import { savePurchaseLog, getPurchaseLogs } from './services/firebasePurchase';
 
@@ -23,17 +22,16 @@ export default function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  useEffect(() => {
-    initAuth();
-  }, []);
-
   const handleSyncToSheets = async () => {
     try {
       setIsSyncing(true);
-      const sheetId = await syncLogsToSheets(purchaseHistory);
-      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
-      alert(`Successfully synced to Google Sheets!\n\nSpreadsheet ID: ${sheetId}`);
-      window.open(url, '_blank');
+      const sheetUrl = await syncLogsToSheets(purchaseHistory);
+      if (sheetUrl) {
+         alert(`Successfully synced to Google Sheets!`);
+         window.open(sheetUrl, '_blank');
+      } else {
+         alert(`Successfully synced to Google Apps Script backend!`);
+      }
     } catch (e: any) {
       console.error(e);
       alert("Failed to sync to Google Sheets: " + e.message);
