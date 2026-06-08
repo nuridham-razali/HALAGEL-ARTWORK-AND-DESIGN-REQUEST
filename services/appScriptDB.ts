@@ -2,7 +2,7 @@ import { PurchaseLog } from '../type';
 
 // Make sure to add your Apps Script Web App URL in your .env file
 // Example: VITE_APPS_SCRIPT_URL=https://script.google.com/macros/s/.../exec
-const SCRIPT_URL = (import.meta as any).env.VITE_APPS_SCRIPT_URL || '';
+const SCRIPT_URL = (import.meta as any).env.VITE_APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbx5nHdCs-P59IZkqxN6nBvPH19mNnfgTImObYgDf2_YIQ4WiWzIX0AZyFpwmu3lK--MaA/exec';
 
 export const getScriptUrl = (): string | null => {
   return SCRIPT_URL || null;
