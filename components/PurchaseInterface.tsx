@@ -30,8 +30,8 @@ const DEPARTMENTS = [
   "Creative & Design"
 ];
 
-export const PurchaseInterface = ({ onBack }: { onBack: () => void }) => {
-  const [purchaseData, setPurchaseData] = useState<PurchaseRequisitionData>(INITIAL_PURCHASE_DATA);
+export const PurchaseInterface = ({ onBack, initialLog }: { onBack: () => void, initialLog?: PurchaseLog | null }) => {
+  const [purchaseData, setPurchaseData] = useState<PurchaseRequisitionData>(initialLog?.data || INITIAL_PURCHASE_DATA);
   const [purchaseHistory, setPurchaseHistory] = useState<PurchaseLog[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -50,16 +50,31 @@ export const PurchaseInterface = ({ onBack }: { onBack: () => void }) => {
     }
   }, []);
 
+  const toUpper = (val: any) => typeof val === 'string' ? val.toUpperCase() : val;
+  const toTitleCase = (val: string) => {
+    if (!val) return val;
+    return val.split(' ').map(word => 
+        word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''
+    ).join(' ');
+  };
+
   const handlePurchaseChange = (field: keyof PurchaseRequisitionData, value: any) => {
-    setPurchaseData(prev => ({ ...prev, [field]: value }));
+    setPurchaseData(prev => ({ ...prev, [field]: toUpper(value) }));
   };
 
   const handlePurchaseNestedChange = (section: 'requestedBy' | 'approvedBy' | 'acknowledgedAdmin' | 'acknowledgedPurchasing', field: string, value: any) => {
+    let formattedValue = value;
+    if (field === 'signature' && typeof value === 'string') {
+        formattedValue = toTitleCase(value);
+    } else {
+        formattedValue = toUpper(value);
+    }
+    
     setPurchaseData(prev => ({
         ...prev,
         [section]: {
             ...prev[section],
-            [field]: value
+            [field]: formattedValue
         }
     }));
   };
@@ -84,33 +99,48 @@ export const PurchaseInterface = ({ onBack }: { onBack: () => void }) => {
   const handleItemChange = (id: string, field: keyof PurchaseItem, value: any) => {
     setPurchaseData(prev => ({
         ...prev,
-        items: prev.items.map(item => item.id === id ? { ...item, [field]: value } : item)
+        items: prev.items.map(item => item.id === id ? { ...item, [field]: toUpper(value) } : item)
     }));
   };
 
   const isPrNumberUnique = (prNo: string) => {
       if(!prNo) return true;
-      return !purchaseHistory.some(log => log.prNo === prNo);
+      return !purchaseHistory.some(log => log.prNo === prNo && log.id !== initialLog?.id);
   };
 
   const isCurrentPrNumberUsed = !isPrNumberUnique(purchaseData.prNo);
 
   const saveToHistory = () => {
-      // Allow saving even if PR number is used? Or simply save everything over time.
-      // Wait, let's just always log it.
       const now = new Date();
-      const newLog: PurchaseLog = {
-          id: Date.now().toString(),
-          prNo: purchaseData.prNo || 'DRAFT-' + Math.floor(Math.random() * 1000),
-          requesterName: purchaseData.requesterName,
-          companyName: purchaseData.companyName,
-          department: purchaseData.department,
-          dateCreated: now.toLocaleDateString(),
-          createdAtTime: now.toLocaleTimeString(),
-          status: 'Generated',
-          data: purchaseData
-      };
-      const updatedHistory = [newLog, ...purchaseHistory];
+      let updatedHistory;
+      if (initialLog) {
+         // Update existing log
+         updatedHistory = purchaseHistory.map(log => 
+             log.id === initialLog.id ? {
+                 ...log,
+                 prNo: purchaseData.prNo || log.prNo,
+                 requesterName: purchaseData.requesterName,
+                 companyName: purchaseData.companyName,
+                 department: purchaseData.department,
+                 data: purchaseData // update the data
+             } : log
+         );
+      } else {
+          // Create new
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          const newLog: PurchaseLog = {
+              id: Date.now().toString(),
+              prNo: purchaseData.prNo || 'DRAFT-' + Math.floor(Math.random() * 1000),
+              requesterName: purchaseData.requesterName,
+              companyName: purchaseData.companyName,
+              department: purchaseData.department,
+              dateCreated: `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`,
+              createdAtTime: now.toLocaleTimeString(),
+              status: 'Generated',
+              data: purchaseData
+          };
+          updatedHistory = [newLog, ...purchaseHistory];
+      }
       setPurchaseHistory(updatedHistory);
       localStorage.setItem('halagel_purchase_history', JSON.stringify(updatedHistory));
   };

@@ -6,15 +6,6 @@ interface PurchasePdfTemplateProps {
   data: PurchaseRequisitionData;
 }
 
-const formatDate = (dateStr: string) => {
-  if(!dateStr) return "";
-  const parts = dateStr.split('-');
-  if(parts.length === 3) {
-      return `${parts[0]}/${parts[1]}/${parts[2]}`; // YYYY/MM/DD based on the screenshot text! Wait, screenshot is 2026/04/09 (YYYY/MM/DD)
-  }
-  return dateStr;
-}
-
 const formatCurrency = (val: number | undefined | null | string) => {
     const num = Number(val);
     if (isNaN(num)) return "0.00";
@@ -66,7 +57,7 @@ export const PurchasePdfTemplate = forwardRef<HTMLDivElement, PurchasePdfTemplat
             <div className="flex gap-4 items-end">
                 <span className="font-bold text-[11px]">DATE</span>
                 <span className="font-bold text-[11px]">:</span>
-                <span className="font-bold text-[11px] pb-[1px]">{data.date ? data.date.replace(/-/g, '/') : ''}</span>
+                <span className="font-bold text-[11px] pb-[1px]">{formatPdfDate(data.date)}</span>
             </div>
             <div className="flex gap-4 items-end pr-4">
                 <span className="font-bold text-[11px]">PURCHASE REQUISITION NO</span>
@@ -110,13 +101,13 @@ export const PurchasePdfTemplate = forwardRef<HTMLDivElement, PurchasePdfTemplat
             <table className="w-full border border-black border-collapse table-fixed text-black text-[11px]">
                 <thead>
                     <tr className="bg-transparent text-black">
-                        <th className="border border-black p-2 w-10 text-center font-bold">NO</th>
-                        <th className="border border-black p-2 w-24 text-center font-bold leading-tight">ITEM<br/>CODE</th>
-                        <th className="border border-black p-2 text-center font-bold">DESCRIPTION</th>
-                        <th className="border border-black p-2 w-16 text-center font-bold">OUM</th>
-                        <th className="border border-black p-2 w-[70px] text-center font-bold">QUANTITY</th>
-                        <th className="border border-black p-2 w-[80px] text-center font-bold leading-tight">COST<br/>PER UNIT</th>
-                        <th className="border border-black p-2 w-24 text-center font-bold leading-tight">TOTAL COST</th>
+                        <th className="border border-black p-2 w-10 text-center font-normal">NO</th>
+                        <th className="border border-black p-2 w-24 text-center font-normal leading-tight">ITEM<br/>CODE</th>
+                        <th className="border border-black p-2 text-center font-normal">DESCRIPTION</th>
+                        <th className="border border-black p-2 w-16 text-center font-normal">OUM</th>
+                        <th className="border border-black p-2 w-[70px] text-center font-normal">QUANTITY</th>
+                        <th className="border border-black p-2 w-[80px] text-center font-normal leading-tight">COST<br/>PER UNIT</th>
+                        <th className="border border-black p-2 w-24 text-center font-normal leading-tight">TOTAL COST</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -144,7 +135,7 @@ export const PurchasePdfTemplate = forwardRef<HTMLDivElement, PurchasePdfTemplat
                          </tr>
                     ))}
                     <tr className="bg-transparent">
-                        <td colSpan={6} className="border border-black p-2 pr-4 text-right font-bold text-[11px]">TOTAL (RM)</td>
+                        <td colSpan={6} className="border border-black p-2 pr-4 text-right font-normal text-[11px]">TOTAL (RM)</td>
                         <td className="border border-black p-2 text-center text-[11px] font-normal">{formatCurrency(totalCost)}</td>
                     </tr>
                 </tbody>

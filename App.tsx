@@ -1,21 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { ShoppingCart, Edit3, Download, Settings, FileText, Plus, RefreshCw, Layers, Search } from 'lucide-react';
+import { ShoppingCart, Edit3, Download, Settings, FileText, Plus, RefreshCw, Layers, Search, Database } from 'lucide-react';
 import { DesignInterface } from './components/DesignInterface';
 import { PurchaseInterface } from './components/PurchaseInterface';
 import { PurchasePdfTemplate } from './components/PurchasePdfTemplate';
 import { LOGO_BASE64 } from './constants';
 import { PurchaseLog } from './type';
+import { syncLogsToSheets } from './syncToSheets';
+import { initAuth } from './googleAuth';
 
 export default function App() {
   const [activeView, setActiveView] = useState<'dashboard' | 'purchase' | 'design' | 'database'>('dashboard');
   const [purchaseHistory, setPurchaseHistory] = useState<PurchaseLog[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editTarget, setEditTarget] = useState<PurchaseLog | null>(null);
 
   const [downloadTarget, setDownloadTarget] = useState<PurchaseLog | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    initAuth();
+  }, []);
+
+  const handleSyncToSheets = async () => {
+    try {
+      setIsSyncing(true);
+      const sheetId = await syncLogsToSheets(purchaseHistory);
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+      alert(`Successfully synced to Google Sheets!\n\nSpreadsheet ID: ${sheetId}`);
+      window.open(url, '_blank');
+    } catch (e: any) {
+      console.error(e);
+      alert("Failed to sync to Google Sheets: " + e.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (downloadTarget && !isDownloading) {
@@ -95,12 +118,22 @@ export default function App() {
     }
   }, [activeView]);
 
+  const handleEdit = (log: PurchaseLog) => {
+      setEditTarget(log);
+      setActiveView('purchase');
+  };
+
+  const handleCreateNew = () => {
+      setEditTarget(null);
+      setActiveView('purchase');
+  };
+
   if (activeView === 'design') {
     return <DesignInterface onBack={() => setActiveView('dashboard')} />;
   }
 
   if (activeView === 'purchase') {
-    return <PurchaseInterface onBack={() => setActiveView('dashboard')} />;
+    return <PurchaseInterface onBack={() => setActiveView('dashboard')} initialLog={editTarget} />;
   }
 
   const filteredHistory = purchaseHistory.filter(log => 
@@ -136,14 +169,11 @@ export default function App() {
                <span>Database</span>
             </button>
             <button 
-               onClick={() => setActiveView('purchase')}
+               onClick={handleCreateNew}
                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
             >
                <FileText size={18} />
                <span>Create New</span>
-            </button>
-            <button className="text-slate-500 hover:text-slate-800 transition-colors">
-               <Settings size={20} />
             </button>
          </div>
       </header>
@@ -157,7 +187,7 @@ export default function App() {
                    <h1 className="text-4xl font-bold text-[#1e293b] mb-4 tracking-tight">Purchase Request Portal</h1>
                    <p className="text-slate-500 text-lg">Create and manage purchase requests.</p>
                    <button
-                      onClick={() => setActiveView('purchase')}
+                      onClick={handleCreateNew}
                       className="mt-8 bg-[#0284c7] hover:bg-[#0369a1] text-white px-6 py-3 rounded-lg font-semibold text-lg flex items-center gap-2 mx-auto transition-colors shadow-sm"
                    >
                       <Plus size={20} strokeWidth={3} />
@@ -195,6 +225,9 @@ export default function App() {
                                   </div>
                                </div>
                                <div className="flex items-center gap-3 text-slate-400 self-end sm:self-auto">
+                                  <button onClick={() => handleEdit(log)} className="p-2 hover:bg-slate-100 hover:text-[#0284c7] rounded transition-colors" title="Edit">
+                                     <Edit3 size={18} />
+                                  </button>
                                   <button onClick={() => setDownloadTarget(log)} disabled={isDownloading} className="p-2 hover:bg-slate-100 hover:text-[#0284c7] rounded transition-colors" title="Download">
                                      <Download size={18} />
                                   </button>
@@ -212,6 +245,10 @@ export default function App() {
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-4">
                     <h2 className="text-2xl font-bold text-[#1e293b]">Purchase Requests Database</h2>
                     <div className="flex items-center gap-4">
+                       <button onClick={handleSyncToSheets} disabled={isSyncing} className="flex items-center gap-2 bg-[#10b981] hover:bg-[#059669] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50">
+                          <Database size={16} /> 
+                          {isSyncing ? 'Syncing...' : 'Sync to Sheets'}
+                       </button>
                        <div className="relative">
                           <input 
                              type="text" 
@@ -263,6 +300,9 @@ export default function App() {
                                                    </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 self-end sm:self-auto">
+                                                   <button onClick={() => handleEdit(log)} className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium hover:bg-slate-200 text-slate-600 hover:text-[#0284c7] rounded-md transition-colors" title="Edit">
+                                                      <Edit3 size={16} /> <span className="hidden sm:inline">Edit</span>
+                                                   </button>
                                                    <button onClick={() => setDownloadTarget(log)} disabled={isDownloading} className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium hover:bg-slate-200 text-slate-600 hover:text-[#0284c7] rounded-md transition-colors" title="Download">
                                                       <Download size={16} /> <span className="hidden sm:inline">Download</span>
                                                    </button>
