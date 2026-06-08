@@ -59,24 +59,42 @@ export const PurchaseInterface = ({ onBack, initialLog }: { onBack: () => void, 
   };
 
   const handlePurchaseChange = (field: keyof PurchaseRequisitionData, value: any) => {
-    setPurchaseData(prev => ({ ...prev, [field]: toUpper(value) }));
+    setPurchaseData(prev => {
+        const newData = { ...prev, [field]: toUpper(value) };
+        if (field === 'requesterName') {
+            newData.requestedBy = { ...newData.requestedBy, name: toUpper(value) };
+        } else if (field === 'date') {
+            newData.requestedBy = { ...newData.requestedBy, date: value };
+        }
+        return newData;
+    });
   };
 
   const handlePurchaseNestedChange = (section: 'requestedBy' | 'approvedBy' | 'acknowledgedAdmin' | 'acknowledgedPurchasing', field: string, value: any) => {
     let formattedValue = value;
     if (field === 'signature' && typeof value === 'string') {
         formattedValue = toTitleCase(value);
-    } else {
+    } else if (field !== 'date' && field !== 'signature') {
         formattedValue = toUpper(value);
     }
     
-    setPurchaseData(prev => ({
-        ...prev,
-        [section]: {
-            ...prev[section],
-            [field]: formattedValue
+    setPurchaseData(prev => {
+        const newData = {
+            ...prev,
+            [section]: {
+                ...prev[section],
+                [field]: formattedValue
+            }
+        };
+
+        if (section === 'requestedBy' && field === 'name') {
+            newData.requesterName = formattedValue as string;
+        } else if (section === 'requestedBy' && field === 'date') {
+            newData.date = formattedValue as string;
         }
-    }));
+
+        return newData;
+    });
   };
 
   const handleAddItem = () => {
@@ -430,11 +448,13 @@ export const PurchaseInterface = ({ onBack, initialLog }: { onBack: () => void, 
                             />
                             <div className="text-[10px] text-gray-400 text-center mt-auto select-none pointer-events-none">Type to sign</div>
                         </div>
-                        <div className="w-full md:w-48">
-                            <FormInput label="Date" type="date" value={purchaseData.requestedBy.date} onChange={(e) => handlePurchaseNestedChange('requestedBy', 'date', e.target.value)} />
+                        <div className="w-full md:w-48 opacity-75 pointer-events-none">
+                            <FormInput label="Date (Auto)" type="date" value={purchaseData.requestedBy.date} onChange={() => {}} />
                         </div>
                     </div>
-                    <FormInput label="Name" value={purchaseData.requestedBy.name} onChange={(e) => handlePurchaseNestedChange('requestedBy', 'name', e.target.value)} />
+                    <div className="opacity-75 pointer-events-none">
+                        <FormInput label="Name (Auto)" value={purchaseData.requestedBy.name} onChange={() => {}} />
+                    </div>
                  </div>
 
 

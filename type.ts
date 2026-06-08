@@ -151,11 +151,11 @@ export interface PurchaseLog {
 
 export const INITIAL_PURCHASE_DATA: PurchaseRequisitionData = {
   date: new Date().toISOString().split('T')[0],
-  prNo: `ADMIN/${new Date().getFullYear()}/`,
+  prNo: '',
   companyName: 'HALAGEL (M) SDN. BHD.',
   requesterName: '',
   department: '',
-  deliveryRequirement: 'ASAP',
+  deliveryRequirement: '',
   accountCode: '',
   purpose: '',
   purposeMonth: '',
