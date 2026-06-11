@@ -58,9 +58,10 @@ export const PurchaseInterface = ({ onBack, initialLog }: { onBack: () => void, 
 
   const handlePurchaseChange = (field: keyof PurchaseRequisitionData, value: any) => {
     setPurchaseData(prev => {
-        const newData = { ...prev, [field]: toUpper(value) };
+        const newVal = field === 'department' ? value : toUpper(value);
+        const newData = { ...prev, [field]: newVal };
         if (field === 'requesterName') {
-            newData.requestedBy = { ...newData.requestedBy, name: toUpper(value) };
+            newData.requestedBy = { ...newData.requestedBy, name: newVal };
         } else if (field === 'date') {
             newData.requestedBy = { ...newData.requestedBy, date: value };
         }

@@ -98,45 +98,45 @@ export const PurchasePdfTemplate = forwardRef<HTMLDivElement, PurchasePdfTemplat
 
        {/* Items Table */}
        <div className="mb-4">
-            <table className="w-full border border-black border-collapse table-fixed text-black text-[11px]">
+            <table className="w-full border-t border-l border-black border-separate border-spacing-0 table-fixed text-black text-[11px]">
                 <thead>
                     <tr className="bg-transparent text-black">
-                        <th className="border border-black p-2 w-10 text-center font-normal">NO</th>
-                        <th className="border border-black p-2 w-24 text-center font-normal leading-tight">ITEM<br/>CODE</th>
-                        <th className="border border-black p-2 text-center font-normal">DESCRIPTION</th>
-                        <th className="border border-black p-2 w-16 text-center font-normal">OUM</th>
-                        <th className="border border-black p-2 w-[70px] text-center font-normal">QUANTITY</th>
-                        <th className="border border-black p-2 w-[80px] text-center font-normal leading-tight">COST<br/>PER UNIT</th>
-                        <th className="border border-black p-2 w-24 text-center font-normal leading-tight">TOTAL COST</th>
+                        <th className="border-b border-r border-black p-2 w-10 text-center font-normal">NO</th>
+                        <th className="border-b border-r border-black p-2 w-24 text-center font-normal leading-tight">ITEM<br/>CODE</th>
+                        <th className="border-b border-r border-black p-2 text-center font-normal">DESCRIPTION</th>
+                        <th className="border-b border-r border-black p-2 w-16 text-center font-normal">OUM</th>
+                        <th className="border-b border-r border-black p-2 w-[70px] text-center font-normal">QUANTITY</th>
+                        <th className="border-b border-r border-black p-2 w-[80px] text-center font-normal leading-tight">COST<br/>PER UNIT</th>
+                        <th className="border-b border-r border-black p-2 w-24 text-center font-normal leading-tight">TOTAL COST</th>
                     </tr>
                 </thead>
                 <tbody>
                     {data.items.slice(0, 8).map((item, index) => (
                         <tr key={item.id || index} className="h-[28px]">
-                            <td className="border border-black p-2 text-center align-top">{index + 1}.</td>
-                            <td className="border border-black p-2 text-center align-top break-all">{item.itemCode || '-'}</td>
-                            <td className="border border-black p-2 align-top break-words whitespace-pre-wrap leading-tight">{item.description}</td>
-                            <td className="border border-black p-2 text-center uppercase align-top break-words">{item.uom}</td>
-                            <td className="border border-black p-2 text-center align-top">{item.quantity}</td>
-                            <td className="border border-black p-2 text-center align-top">{item.costPerUnit ? formatCurrency(item.costPerUnit) : ''}</td>
-                            <td className="border border-black p-2 text-center align-top">{formatCurrency(Number(item.quantity || 0) * Number(item.costPerUnit || 0))}</td>
+                            <td className="border-b border-r border-black p-2 text-center align-top">{index + 1}.</td>
+                            <td className="border-b border-r border-black p-2 text-center align-top break-all">{item.itemCode || '-'}</td>
+                            <td className="border-b border-r border-black p-2 align-top break-words whitespace-pre-wrap leading-tight">{item.description}</td>
+                            <td className="border-b border-r border-black p-2 text-center uppercase align-top break-words">{item.uom}</td>
+                            <td className="border-b border-r border-black p-2 text-center align-top">{item.quantity}</td>
+                            <td className="border-b border-r border-black p-2 text-center align-top">{item.costPerUnit ? formatCurrency(item.costPerUnit) : ''}</td>
+                            <td className="border-b border-r border-black p-2 text-center align-top">{formatCurrency(Number(item.quantity || 0) * Number(item.costPerUnit || 0))}</td>
                         </tr>
                     ))}
                     {/* Fill empty rows up to 8 */}
                     {Array.from({ length: Math.max(0, 8 - data.items.length) }).map((_, i) => (
                          <tr key={`empty-${i}`} className="h-[28px]">
-                            <td className="border border-black p-2 text-center">{data.items.length + i + 1}.</td>
-                            <td className="border border-black p-2 text-center"></td>
-                            <td className="border border-black p-2"></td>
-                            <td className="border border-black p-2"></td>
-                            <td className="border border-black p-2"></td>
-                            <td className="border border-black p-2"></td>
-                            <td className="border border-black p-2"></td>
+                            <td className="border-b border-r border-black p-2 text-center">{data.items.length + i + 1}.</td>
+                            <td className="border-b border-r border-black p-2 text-center"></td>
+                            <td className="border-b border-r border-black p-2"></td>
+                            <td className="border-b border-r border-black p-2"></td>
+                            <td className="border-b border-r border-black p-2"></td>
+                            <td className="border-b border-r border-black p-2"></td>
+                            <td className="border-b border-r border-black p-2"></td>
                          </tr>
                     ))}
                     <tr className="bg-transparent">
-                        <td colSpan={6} className="border border-black p-2 pr-4 text-right font-normal text-[11px]">TOTAL (RM)</td>
-                        <td className="border border-black p-2 text-center text-[11px] font-normal">{formatCurrency(totalCost)}</td>
+                        <td colSpan={6} className="border-b border-r border-black p-2 pr-4 text-right font-normal text-[11px]">TOTAL (RM)</td>
+                        <td className="border-b border-r border-black p-2 text-center text-[11px] font-normal">{formatCurrency(totalCost)}</td>
                     </tr>
                 </tbody>
             </table>
